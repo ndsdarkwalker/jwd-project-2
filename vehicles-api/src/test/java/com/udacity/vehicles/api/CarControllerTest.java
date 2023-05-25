@@ -134,19 +134,19 @@ public class CarControllerTest {
      * Tests the deletion of a single car by ID.
      * @throws Exception if the delete operation of a vehicle fails
      */
-//    @Test
-//    public void deleteCar() throws Exception {
-//        /**
-//         * TODO: Add a test to check whether a vehicle is appropriately deleted
-//         *   when the `delete` method is called from the Car Controller. This
-//         *   should utilize the car from `getCar()` below.
-//         */
-//        this.mvc.perform(delete("/cars/1")
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk());
-//        Mockito.verify(carService, times(1)).delete(1L);
-//    }
+    @Test
+    public void deleteCar() throws Exception {
+        /**
+         * TODO: Add a test to check whether a vehicle is appropriately deleted
+         *   when the `delete` method is called from the Car Controller. This
+         *   should utilize the car from `getCar()` below.
+         */
+        this.mvc.perform(delete("/cars/1")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        Mockito.verify(carService, times(1)).delete(1L);
+    }
 
     /**
      * Creates an example Car object for use in testing.
