@@ -1,19 +1,5 @@
 package com.udacity.vehicles.api;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
@@ -23,12 +9,9 @@ import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.Details;
 import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import com.udacity.vehicles.service.CarService;
-import java.net.URI;
-import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
@@ -40,6 +23,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.net.URI;
+import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Implements testing of the CarController class.
@@ -65,6 +58,8 @@ public class CarControllerTest {
     @MockBean
     private MapsClient mapsClient;
 
+    private ObjectMapper objectMapper;
+
     /**
      * Creates pre-requisites for testing, such as an example car.
      */
@@ -75,6 +70,7 @@ public class CarControllerTest {
         given(carService.save(any())).willReturn(car);
         given(carService.findById(any())).willReturn(car);
         given(carService.list()).willReturn(Collections.singletonList(car));
+        objectMapper = new ObjectMapper();
     }
 
     /**
@@ -134,6 +130,23 @@ public class CarControllerTest {
      * Tests the deletion of a single car by ID.
      * @throws Exception if the delete operation of a vehicle fails
      */
+
+    @Test
+    public void updateCar() throws Exception {
+        // Arrange
+        Car existingCar = getCar();
+        Car updatedCar = getUpdateCar();
+
+        when(carService.findById(1L)).thenReturn(existingCar);
+        when(carService.save(any(Car.class))).thenReturn(updatedCar);
+
+        Car savedCar = carService.save(updatedCar);
+        this.mvc.perform(put("/cars/1")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedCar))) // Provide the updated car details in the request body
+                .andExpect(status().isOk());
+    }
     @Test
     public void deleteCar() throws Exception {
         /**
@@ -167,6 +180,27 @@ public class CarControllerTest {
         details.setFuelType("Gasoline");
         details.setModelYear(2018);
         details.setProductionYear(2018);
+        details.setNumberOfDoors(4);
+        car.setDetails(details);
+        car.setCondition(Condition.USED);
+        return car;
+    }
+
+    private Car getUpdateCar() {
+        Car car = new Car();
+        car.setId(2L);
+        car.setLocation(new Location(41.730610, -79.935242));
+        Details details = new Details();
+        Manufacturer manufacturer = new Manufacturer(101, "Merc");
+        details.setManufacturer(manufacturer);
+        details.setModel("Impala");
+        details.setMileage(17542);
+        details.setExternalColor("white");
+        details.setBody("merc");
+        details.setEngine("3.6L V6");
+        details.setFuelType("Gasoline");
+        details.setModelYear(2020);
+        details.setProductionYear(2020);
         details.setNumberOfDoors(4);
         car.setDetails(details);
         car.setCondition(Condition.USED);
